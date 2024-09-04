@@ -21,11 +21,11 @@ func Init() {
 	// middleware
 	if viper.GetBool("web.log") {
 		r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-			refererRaw := param.Request.Referer()
-			refererUrl, _ := url.Parse(refererRaw)
-			referer := refererUrl.Host
-			if referer == "" {
-				referer = "N/A"
+			originRaw := param.Request.Header.Get("Origin")
+			originUrl, _ := url.Parse(originRaw)
+			origin := originUrl.Host
+			if origin == "" {
+				origin = "N/A"
 			}
 
 			// ban ping
@@ -37,7 +37,7 @@ func Init() {
 				param.TimeStamp.Format("2006/01/02 - 15:04:05"),
 				param.StatusCode,
 				param.Latency,
-				referer,
+				origin,
 				param.ClientIP,
 				param.Method,
 				param.Path,
