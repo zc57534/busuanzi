@@ -1,28 +1,13 @@
-(function (){
+(function () {
     // 在此处设置您的后端地址 如 https://example.com/api
     let url: string = "http://127.0.0.1:8080/api",
         tags: string[] = ["site_pv", "site_uv", "page_pv", "page_uv"],
-        current: HTMLOrSVGScriptElement = document.currentScript,
-        pjax: boolean = current.hasAttribute("pjax"),                          // 是否启用 pjax
-        api: string = current.getAttribute("data-api") || url,                 // 自定义后端地址
-        prefix: string = current.getAttribute("data-prefix") || "busuanzi",    // 自定义标签ID前缀
-        style: string = current.getAttribute("data-style") || "default",       // 数字显示风格 default | comma | short
+        prefix: string = "busuanzi",    // 自定义标签ID前缀
         storageName: string = "bsz-id";                                        // 本地存储名称
-
-    let format = (num: number, style: string = 'default'): string => {
-        if (style === "comma") return num.toLocaleString();
-        if (style === "short") {
-            const units = ["", "K", "M", "B", "T"];
-            let index = Math.floor(Math.log10(num) / 3);
-            num /= Math.pow(1000, index);
-            return `${Math.round(num * 100) / 100}${units[index]}`;
-        }
-        return num.toString();
-    };
 
     let bsz_send = () => {
         let xhr: XMLHttpRequest = new XMLHttpRequest();
-        xhr.open("POST", api, true);
+        xhr.open("POST", url, true);
 
         // set user identity
         let token: string | null = localStorage.getItem(storageName);
@@ -35,7 +20,7 @@
                     if (res.success === true) {
                         tags.map((tag: string) => {
                             let element = document.getElementById(`${prefix}_${tag}`);
-                            if (element != null) element.innerHTML = format(res['data'][tag], style);
+                            if (element != null) element.innerHTML = res['data'][tag];
 
                             let container = document.getElementById(`${prefix}_container_${tag}`);
                             if (container != null) container.style.display = "inline";
@@ -49,17 +34,16 @@
         }
         xhr.send();
     };
+
     bsz_send();
 
-    if (!!pjax) {
-        let history_pushState: Function = window.history.pushState;
-        window.history.pushState = function () {
-            history_pushState.apply(this, arguments);
-            bsz_send();
-        };
+    let history_pushState: Function = window.history.pushState;
+    window.history.pushState = function () {
+        history_pushState.apply(this, arguments);
+        bsz_send();
+    };
 
-        window.addEventListener("popstate", function (_e: PopStateEvent) {
-            bsz_send();
-        }, false);
-    }
+    window.addEventListener("popstate", function (_e: PopStateEvent) {
+        bsz_send();
+    }, false);
 })()

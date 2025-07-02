@@ -2,15 +2,17 @@ package config
 
 import (
 	"flag"
-	"github.com/spf13/viper"
 	"log"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 var (
 	configPath string
 	DistPath   string
-	VERSION    = "2.8.4"
+	VERSION    = "2.8.8"
+	DEBUG      bool
 )
 
 func Init() {
@@ -28,4 +30,6 @@ func Init() {
 	}
 
 	log.Printf("[INFO] Config loaded %s", viper.AllSettings())
+
+	DEBUG = viper.GetBool("debug")
 }
